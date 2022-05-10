@@ -60,3 +60,4 @@ private boolean seenStatus;
         this.seenStatus = seenStatus;
     }
 }
+
