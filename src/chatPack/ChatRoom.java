@@ -6,6 +6,7 @@ public class ChatRoom {
     private final int id;
     private String name;
     private ArrayList<User> userList;
+    private ArrayList<Message> messageList;
     private Message lastMessageSent;
     private String chatroomImageLink;
     public boolean flag = false;
@@ -46,4 +47,29 @@ public class ChatRoom {
     public void setLastMessageSent(Message lastMessageSent) {
         this.lastMessageSent = lastMessageSent;
     }
+
+    public ArrayList<Message> getMessageList() {
+        return messageList;
+    }
+
+    public void setMessageList(ArrayList<Message> messageList) {
+        this.messageList = messageList;
+    }
+
+    public String getChatroomImageLink() {
+        return chatroomImageLink;
+    }
+
+    public void setChatroomImageLink(String chatroomImageLink) {
+        this.chatroomImageLink = chatroomImageLink;
+    }
+
+    public boolean isFlag() {
+        return flag;
+    }
+
+    public void setFlag(boolean flag) {
+        this.flag = flag;
+    }
+
 }
