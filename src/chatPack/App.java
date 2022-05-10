@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
@@ -25,8 +26,8 @@ public class App {
      * @throws SQLException
      */
     public App() throws SQLException {
-        con = DriverManager.getConnection("jdbc:mysql://localhost:3306/chatahc", "root",
-                "hello");
+        con = DriverManager.getConnection("jdbc:mysql://localhost:3306/chatapp", "mohamed",
+                "password");
         Statement st = con.createStatement();
     }
 
@@ -88,24 +89,6 @@ public class App {
         preQuery.executeUpdate();
         System.out.println("registration process is done.");
     }
-
-    /**
-     * Task for : Mohamed Yehia
-     * this function is taking a user information then compare it with the database to make the user login
-     */
-//    public void login(String username,String password)throws SQLException {
-//        query="select username,password from user ";
-//        preQuery=con.prepareStatement(query);
-//        result=preQuery.executeQuery();
-//        while(result.next())
-//        {
-//            if(result.getString("username").equals(username)&&result.getString("password").equals(password))
-//                System.out.println("done");
-//            else
-//                System.out.println("this account not found");
-//        }
-//
-//    }
     /**
      * Task for : Mohamed Walid , a sub task from userDataValidation function to remove duplicate code
      *
@@ -163,32 +146,32 @@ public class App {
             return 2;
 
     }
-    /**
-     * after clicking some button in GUi it will make the user choose from his images which one to upload
-     * for his profile or story
-     * @throws SQLException
-     * @throws FileNotFoundException
-     */
-    public void uploadImage(int userId) throws SQLException, IOException {
-        JFileChooser jfc = new JFileChooser();
-        jfc.showOpenDialog(null);
-        File file = jfc.getSelectedFile();
-        FileInputStream fis=  new FileInputStream(file);
-        query = "insert into image (image) values(?)";
-        preQuery = con.prepareStatement(query);
-        preQuery.setBinaryStream(1, fis, fis.available());
-        preQuery.executeUpdate();
-        //get last inserted data using the primary key sorting methodology
-        query = "select id from image order by id desc limit 1";
-        preQuery = con.prepareStatement(query);
-        result = preQuery.executeQuery();
-        result.next();
-        int userImageId = result.getInt(1);
-        query = "update table user set userImageId = ? where id = ?";
-        preQuery = con.prepareStatement(query);
-        preQuery.setInt(1, userId);
-        preQuery.executeUpdate();
-    }
+//    /**
+//     * after clicking some button in GUi it will make the user choose from his images which one to upload
+//     * for his profile or story
+//     * @throws SQLException
+//     * @throws FileNotFoundException
+//     */
+//    public void uploadImage(int userId) throws SQLException, IOException {
+//        JFileChooser jfc = new JFileChooser();
+//        jfc.showOpenDialog(null);
+//        File file = jfc.getSelectedFile();
+//        FileInputStream fis=  new FileInputStream(file);
+//        query = "insert into image (image) values(?)";
+//        preQuery = con.prepareStatement(query);
+//        preQuery.setBinaryStream(1, fis, fis.available());
+//        preQuery.executeUpdate();
+//        //get last inserted data using the primary key sorting methodology
+//        query = "select id from image order by id desc limit 1";
+//        preQuery = con.prepareStatement(query);
+//        result = preQuery.executeQuery();
+//        result.next();
+//        int userImageId = result.getInt(1);
+//        query = "update table user set userImageId = ? where id = ?";
+//        preQuery = con.prepareStatement(query);
+//        preQuery.setInt(1, userId);
+//        preQuery.executeUpdate();
+//    }
 
     /**
      * Task for: bavley,,,
@@ -235,7 +218,7 @@ public class App {
         preQuery = con.prepareStatement(query);
         result = preQuery.executeQuery();
         while (result.next()){
-        Story st = new Story(result.getInt(1),result.getString(4), result.getObject(3, LocalTime.class), result.getObject(2, LocalDate.class));
+            Story st = new Story(result.getInt(1),result.getString(4), result.getObject(3, LocalTime.class), result.getObject(2, LocalDate.class));
             if (!st.getStoryUploadedDate().equals(LocalDate.now())){
                 query = "delete from story where storyUploaderId = ? and storyDateUploaded = ? and storyTimeUploaded = ?";
                 preQuery = con.prepareStatement(query);
@@ -291,6 +274,8 @@ public class App {
                 if (!currentChat.flag && currentChat.getId() == tmpMessage.getChatId()){
                     currentChat.flag = true;
                     currentChat.setLastMessageSent(tmpMessage);
+                    currentChat.setMessageList(expandMessages(chatRooms.get(i).getId(),userId));
+                    chatRooms.get(i).setUserList(showChatInfo(chatRooms.get(i).getId(),userId));
                     firstOccurredChat.add(currentChat);
                     break;
                 }
@@ -374,7 +359,8 @@ public class App {
      * Corner case: if the chat was private chat between only two persons then for each show the friend name if he was in his connection lsit
      * or show his number otherwise
      */
-    public void showChatInfo(int chatId, int currentUserId) throws SQLException {
+    public ArrayList<User> showChatInfo(int chatId, int currentUserId) throws SQLException {
+        ArrayList<User>userList = new ArrayList<User>();
         query = "select * from chatRoom where id = ?";
         preQuery = con.prepareStatement(query);
         preQuery.setInt(1, chatId);
@@ -401,6 +387,8 @@ public class App {
                     System.out.println("Not opened Yet" + "\n");
                 else
                     System.out.println(result.getString(3) + "\n");
+                User tmpUser = returnUser(result.getInt(1));
+                userList.add(tmpUser);
                 continue;
             }
             preQuery.setInt(1, currentUserId);
@@ -414,35 +402,39 @@ public class App {
                 chat.getUserList().add(u);
                 if (lastChatOpen == null) {
                     System.out.println( u.getUsername() + "\n" + "Not opened Yet" + "\n");
-
+                    userList.add(u);
                 }
-                else
+                else{
                     System.out.println( u.getUsername() + "\n" + result.getString(3) + "\n");
+                    userList.add(u);
+                }
             }
             else {
                 u = returnUser(result.getInt(1));
                 chat.getUserList().add(u);
                 if (lastChatOpen == null) {
                     System.out.println(u.getUsername() + "\n" + "Not opened Yet" + "\n");
-
-                    }
-                else
-                    System.out.println(u.getUsername() + "\n" + result.getString(3) + "\n");
-
+                    userList.add(u);
                 }
-
+                else{
+                    System.out.println(u.getUsername() + "\n" + result.getString(3) + "\n");
+                    userList.add(u);
+                }
             }
         }
+        return userList;
+    }
 
     /**
      * Task for : Mohamed Walid
      * after opening a chat expand all it's messages with its time
      * CORNER CASE : you have to split each day messages
      */
-    public void expandMessages(int chatId, int currentUserId) throws SQLException {
+    public ArrayList<Message> expandMessages(int chatId, int currentUserId) throws SQLException {
+        ArrayList<Message>chatMessages = new ArrayList<Message>();
         this.showChatInfo(chatId, currentUserId);
         // make a query to get all the messages of a specific chat from database with ascending order by date first then time
-        query = "select senderId, messageText, date, time from message where chatId = ? order by date asc, time asc";
+        query = "select id, senderId, chatId, messageText, date, time, seenStatus from message where chatId = ? order by date asc, time asc";
         //to make the pointer of resultSet go forward and backward in the dataSet we have to make this next line
         preQuery = con.prepareStatement(query, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
         preQuery.setInt(1, chatId);
@@ -459,11 +451,19 @@ public class App {
                 innerLoopCheckInfinity = true;
                 // the UI experience said that your message will be printed on the left half of the screen
                 // and your friends will be on the right half
-                if (result.getInt(1) == currentUserId)
+                if (result.getInt(1) == currentUserId){
                     System.out.println(returnUsername(currentUserId) + " (YOU) " +  "\n" + result.getString(2) + "\n[" + result.getString(4) + "]\n");
-                else
+                    chatMessages.add(new Message(result.getInt(1),result.getInt(2), result.getInt(3)
+                            ,result.getString(4), result.getDate(5).toString(), result.getTime(6).toString(),
+                            result.getBoolean(7)));
+                }
+                else{
                     System.out.println("\t\t\t\t\t" + returnUsername(result.getInt(1)) + "\n\t\t\t\t\t" + result.getString(2) + "\n\t\t\t\t\t["
                             + result.getString(4) + "]\n");
+                    chatMessages.add(new Message(result.getInt(1),result.getInt(2), result.getInt(3)
+                    ,result.getString(4), result.getDate(5).toString(), result.getTime(6).toString(),
+                            result.getBoolean(7)));
+                }
                 if (!result.next())
                     break;
             }
@@ -473,6 +473,7 @@ public class App {
             if (innerLoopCheckInfinity)
                 result.previous();
         }
+        return chatMessages;
     }
 
     /**
@@ -480,22 +481,22 @@ public class App {
      * send message to the current opened chat
      */
     public void sendMessage(int currentUserId,int chatId, String msg)throws SQLException {
-            query="select isBlocked from userJoinChat where chatId=? and userId = ?";
-            preQuery = con.prepareStatement(query);
-            preQuery.setInt(1,chatId);
-            preQuery.setInt(2, currentUserId);
-            result = preQuery.executeQuery();
-            result.next();
-            if(result.getBoolean(1)){
-                System.out.println("You cannot send message to this group because you are on longer a participant in it");
-                return;
-            }
-            query = "insert into message(senderId,chatId,messageText) values(?,?,?)";
-            preQuery = con.prepareStatement(query);
-            preQuery.setInt(1,currentUserId);
-            preQuery.setInt(2,chatId);
-            preQuery.setString(3,msg);
-            preQuery.executeUpdate();
+        query="select isBlocked from userJoinChat where chatId=? and userId = ?";
+        preQuery = con.prepareStatement(query);
+        preQuery.setInt(1,chatId);
+        preQuery.setInt(2, currentUserId);
+        result = preQuery.executeQuery();
+        result.next();
+        if(result.getBoolean(1)){
+            System.out.println("You cannot send message to this group because you are on longer a participant in it");
+            return;
+        }
+        query = "insert into message(senderId,chatId,messageText) values(?,?,?)";
+        preQuery = con.prepareStatement(query);
+        preQuery.setInt(1,currentUserId);
+        preQuery.setInt(2,chatId);
+        preQuery.setString(3,msg);
+        preQuery.executeUpdate();
     }
 
     /**
@@ -523,7 +524,7 @@ public class App {
      * Task for : Mohamed Yehia
      * the user choose a contact friend and add him to the opened chat room
      */
-    void addUserToGroup(User user) throws SQLException {
+    public void addUserToGroup(User user) throws SQLException {
         query = "insert into userJoinChat(userId,chatId) values(?,?);";
         preQuery = con.prepareStatement(query);
         preQuery.setInt(1, user.getId());
@@ -576,7 +577,7 @@ public class App {
      */
     public void  searchForConnectionByNumber(int userId, String friendNumber) throws SQLException {
         System.out.println("user search by number: \n\n");
-        query = "select * from userconnection where userId= ?";
+        query = "select * from userConnection where userId= ?";
         preQuery = con.prepareStatement(query);
         preQuery.setInt(1, userId);
         result = preQuery.executeQuery();
@@ -696,5 +697,61 @@ public class App {
         return result.getInt(1);
     }
 
+    /**
+     * this function is a part of expandChatConnection function.
+     * for a specific user get all the messages that he did not read it yet from the last date and time he opened the chat
+     * @param currentUserId
+     * @param chatId
+     * @return
+     */
+    public int numberOfUnreadMessages(int currentUserId, int chatId) throws SQLException{
+        // get lastOpenDate and lastOpenTime from chatId and userId
+        query = "select lastDateChatOpened, lastTimeChatOpened from userJoinChat where chatId = ? and userId = ?";
+        preQuery =con.prepareStatement(query);
+        preQuery.setInt(1, currentUserId);
+        preQuery.setInt(2, chatId);
+        result = preQuery.executeQuery();
+        Date userLastDateOpened;
+        Time userLastTimeOpened;
+        if (result.next()) {
+            userLastDateOpened = result.getDate(1);
+            userLastTimeOpened = result.getTime(2);
+        }
+        else {
+            query = "select dateOfGroupCreation, timeOfGroupCreation from chatroom where id = ?";
+            preQuery = con.prepareStatement(query);
+            preQuery.setInt(1, chatId);
+            ResultSet tmpResult = preQuery.executeQuery();
+            tmpResult.next();
+            Date dateOfGroupCreation = tmpResult.getDate(1);
+            query = "select count(*) from message where date >= ? and chatId = ?";
+            preQuery = con.prepareStatement(query);
+            preQuery.setDate(1, tmpResult.getDate(1));
+            preQuery.setInt(2, chatId);
 
+        }
+            query = "select dateOfGroupCreation, timeOfGroupCreation from chatroom where id = ?";
+            preQuery = con.prepareStatement(query);
+            preQuery.setInt(1, chatId);
+            ResultSet tmpResult = preQuery.executeQuery();
+            userLastDateOpened = tmpResult.getDate(1);
+            userLastTimeOpened = tmpResult.getTime(2);
+        // counter for the return value of method
+        int unreadMessageCounter = 0;
+        // get all messages that is greater than or equals to the
+        // last date that the current user opened the current chat
+        query = "select date, time from message where lastDateChatOpened >= ? and chatId = ?";
+        preQuery = con.prepareStatement(query);
+        preQuery.setDate(1, userLastDateOpened);
+        preQuery.setInt(2, chatId);
+        result = preQuery.executeQuery();
+        while (result.next()){
+            if (result.getDate(1).compareTo(userLastDateOpened)  == 0 &&
+                    (result.getTime(2).compareTo(userLastTimeOpened) <= 0))
+                continue;
+            else
+                unreadMessageCounter++;
+        }
+        return unreadMessageCounter;
+        }
 }
