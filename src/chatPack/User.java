@@ -4,12 +4,15 @@ import java.awt.image.BufferedImage;
 
 // Task for : Mohamed Walid
 public class User {
-    private final int id;
+    private  int id;
     private String username, phoneNumber, password, profileDesc = "default";
     private boolean profileVisibility;
     private int currentChatId;
     private String userImageLink;
     private String lastDateOpened,lastTimeOpened;
+    public User(){
+
+    }
     public User(int id, String username, String phoneNumber, String password, String profileDesc, boolean profileVisiblilty) {
         this.id = id;
         this.username = username;
@@ -93,5 +96,21 @@ public class User {
 
     public void setUserImageLink(String userImageLink) {
         this.userImageLink = userImageLink;
+    }
+
+    public String getLastDateOpened() {
+        return lastDateOpened;
+    }
+
+    public void setLastDateOpened(String lastDateOpened) {
+        this.lastDateOpened = lastDateOpened;
+    }
+
+    public String getLastTimeOpened() {
+        return lastTimeOpened;
+    }
+
+    public void setLastTimeOpened(String lastTimeOpened) {
+        this.lastTimeOpened = lastTimeOpened;
     }
 }
