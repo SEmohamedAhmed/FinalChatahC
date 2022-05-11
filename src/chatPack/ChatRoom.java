@@ -1,23 +1,29 @@
 package chatPack;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 
-public class ChatRoom {
+public class ChatRoom implements Comparable<ChatRoom>{
     private final int id;
     private String name;
     private ArrayList<User> userList;
     private ArrayList<Message> messageList;
     private Message lastMessageSent;
     private String chatroomImageLink;
+    private String dateOfGroupCreation;
+    private String timeOfGroupCreation;
+    private Timestamp dateTimeUser;
     public boolean flag = false;
     public ChatRoom(int id, String name) {
         this.id = id;
         this.name = name;
         userList = new ArrayList<User>();
     }
-    public ChatRoom(int id, String name, String chatroomImageLink){
+    public ChatRoom(int id, String name, String dateOfGroupCreation, String timeOfGroupCreation, String chatroomImageLink){
         this.id = id;
         this.name=  name;
+        this.dateOfGroupCreation = dateOfGroupCreation;
+        this.timeOfGroupCreation = timeOfGroupCreation;
         this.chatroomImageLink = chatroomImageLink;
     }
     public int getId() {
@@ -72,4 +78,29 @@ public class ChatRoom {
         this.flag = flag;
     }
 
+    public String getDateOfGroupCreation() {
+        return dateOfGroupCreation;
+    }
+
+    public void setDateOfGroupCreation(String dateOfGroupCreation) {
+        this.dateOfGroupCreation = dateOfGroupCreation;
+    }
+
+    public String getTimeOfGroupCreation() {
+        return timeOfGroupCreation;
+    }
+
+    public void setTimeOfGroupCreation(String timeOfGroupCreation) {
+        timeOfGroupCreation = timeOfGroupCreation;
+    }
+
+    @Override
+    public int compareTo(ChatRoom o) {
+        if (this.lastMessageSent.getDateTime().after(o.lastMessageSent.getDateTime()))
+            return -1;
+        else if ((this.lastMessageSent.getDateTime().before(o.lastMessageSent.getDateTime())))
+            return 1;
+        else
+            return 0;
+    }
 }
