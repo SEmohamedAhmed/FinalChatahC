@@ -499,6 +499,8 @@ public class App {
             if (innerLoopCheckInfinity)
                 result.previous();
         }
+        if (chatMessages.size() == 0)
+            chatMessages.add(new Message());
         return chatMessages;
     }
 
