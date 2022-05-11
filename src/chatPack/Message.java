@@ -1,12 +1,22 @@
 package chatPack;
+
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.Instant;
+
 // Task for:  Mohamed Walid
 public class Message {
 private  int id, senderId, chatId;
-private final String messageText;
+private  String messageText;
 private String date, time;
+private Timestamp dateTime =Timestamp.valueOf("2000-01-01 00:00:00");
 private boolean seenStatus;
 
-    public Message(int id, int senderId, int chatId, String messageText, String date, String time, boolean seenStatus) {
+    public Message(){
+
+    }
+    public Message(int id, int senderId, int chatId, String messageText, String date, String time,
+                   boolean seenStatus) {
         this.id = id;
         this.senderId = senderId;
         this.chatId = chatId;
@@ -14,6 +24,18 @@ private boolean seenStatus;
         this.date = date;
         this.time = time;
         this.seenStatus = seenStatus;
+        this.dateTime = dateTime;
+    }
+    public Message(int id, int senderId, int chatId, String messageText, String date, String time,
+                   boolean seenStatus, Timestamp dateTime) {
+        this.id = id;
+        this.senderId = senderId;
+        this.chatId = chatId;
+        this.messageText = messageText;
+        this.date = date;
+        this.time = time;
+        this.seenStatus = seenStatus;
+        this.dateTime = dateTime;
     }
     public Message(int senderId, String messageText, String time){
         this.senderId = senderId;
@@ -59,5 +81,24 @@ private boolean seenStatus;
     public void setSeenStatus(boolean seenStatus) {
         this.seenStatus = seenStatus;
     }
-}
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setSenderId(int senderId) {
+        this.senderId = senderId;
+    }
+
+    public void setChatId(int chatId) {
+        this.chatId = chatId;
+    }
+
+    public Timestamp getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(Timestamp dateTime) {
+        this.dateTime = dateTime;
+    }
+}
