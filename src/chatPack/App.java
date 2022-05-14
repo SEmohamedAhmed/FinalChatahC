@@ -1,4 +1,6 @@
 package chatPack;
+import Controllers.Utilities;
+
 import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,6 +13,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
+import static Controllers.Main.utilities;
+
 public class App {
     Connection con;
     Statement statement;
@@ -18,15 +22,14 @@ public class App {
     String query;
     Enumeration<Integer> e;
 
-
     /**
      * This class is the backend of the UI experience
      *
      * @throws SQLException
      */
     public App() throws SQLException {
-        con = DriverManager.getConnection("jdbc:mysql://localhost:3306/chatapp", "mohamed",
-                "password");
+        con = DriverManager.getConnection("jdbc:mysql://localhost:3306/chatahc", "root",
+                "hello");
         Statement st = con.createStatement();
     }
 
@@ -78,7 +81,7 @@ public class App {
      * create new user account and check if it's already exists
      */
     public void registerForUser(User user) throws SQLException {
-        query = "insert into user (username, password, phoneNumber, imageLink, profileDesc) values (?,?,?, ?, ?)";
+        query = "insert into user (username, password, phoneNumber, userImageLink, profileDesc) values (?,?,?,?,?)";
         preQuery = con.prepareStatement(query);
         preQuery.setString(1, user.getUsername());
         preQuery.setString(2, user.getPassword());
@@ -115,6 +118,9 @@ public class App {
         // check every attribute if it exists or not in the database by count the number of elements that matches
         //  the user input and return a value for the caller function to decide
 
+        //check phone number is correct
+        if(!utilities.checkPhoneNum(user.getPhoneNumber()))
+            return 3;       //phone num is not correct
         //check  username if it exists by count function as if it was zero then it does not exist otherwise it exists
         query = "select count(username) from user where username = ?";
         preQuery = con.prepareStatement(query);
@@ -130,9 +136,12 @@ public class App {
             return 2;
         return 0;
     }
+
     public int loginValidation(User u)throws SQLException{
         if (u.getUsername().equals("") || u.getPassword().equals(""))
-            return 0;
+            return 0;   // empty fields
+        if(!searchUser(u.getUsername()))
+            return 2; // user not found
         query = "select count(*) from user where username = ? and password = ?";
         preQuery = con.prepareStatement(query);
         preQuery.setString(1, u.getUsername());
@@ -140,10 +149,23 @@ public class App {
         ResultSet result = preQuery.executeQuery();
         result.next();
         if (result.getInt(1) == 1)
-            return 1;
+            return 1;       // every thing is ok
         else
-            return 2;
-
+            return 3;       //pass is wrong
+    }
+    //MrMody's work Verified
+    private boolean searchUser(String userName) throws SQLException {
+        //mody's work
+        //check for username as if it exists & pass is wrong return alert says pass wrong
+        query = "select count(*) from user where username = ?";
+        preQuery = con.prepareStatement(query);
+        preQuery.setString(1, userName);
+        ResultSet result = preQuery.executeQuery();
+        result.next();
+        if(result.getInt(1) == 1)
+            return true;            //user name exists
+        return false;               // user not found
+        //mody's work
     }
 //    /**
 //     * after clicking some button in GUi it will make the user choose from his images which one to upload
@@ -172,10 +194,6 @@ public class App {
 //        preQuery.executeUpdate();
 //    }
 
-    /**
-     * Task for: bavley,,,
-     * add new connection to the user list
-     */
     public void addConnection(int currentUserId, int friendId, String friendName) throws SQLException{
         query = "insert into userConnection(userId, friendId, friendName) values(?, ?, ?)";
         preQuery = con.prepareStatement(query);
@@ -256,7 +274,7 @@ public class App {
         preQuery = con.prepareStatement(query);
         preQuery.setInt(1, userId);
         ResultSet result = preQuery.executeQuery();
-        ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
+        ArrayList<ChatRoom> chatRooms = new ArrayList<>();
         // using the chatRoom id of the last query and using it for getting all chat info
         // with inner loop query in the chatRoom relation
         while (result.next()){
@@ -319,7 +337,7 @@ public class App {
     }
 
     /**
-     * Task for : Mahmoud sobhy
+     *
      * select a specific chat room from user chat list and open it with all its information and all messages
      * then update the the last opened date and time for this user is this chat
      * and do not forget to save the current opened chat room in the user class
@@ -487,7 +505,7 @@ public class App {
                     System.out.println("\t\t\t\t\t" + returnUsername(result.getInt("senderId")) + "\n\t\t\t\t\t" + result.getString("messageText") + "\n\t\t\t\t\t["
                             + result.getString("time") + "]\n");
                     chatMessages.add(new Message(result.getInt("id"),result.getInt(1), result.getInt(2)
-                    ,result.getString(3), result.getDate(4).toString(), result.getTime(5).toString(),
+                            ,result.getString(3), result.getDate(4).toString(), result.getTime(5).toString(),
                             result.getBoolean(6), result.getTimestamp(8)));
                 }
                 if (!result.next())
@@ -499,15 +517,11 @@ public class App {
             if (innerLoopCheckInfinity)
                 result.previous();
         }
-        if (chatMessages.size() == 0)
-            chatMessages.add(new Message());
+        /*if (chatMessages.size() == 0)
+            chatMessages.add(new Message());*/
         return chatMessages;
     }
 
-    /**
-     * Task for : Mohamed Yehia
-     * send message to the current opened chat
-     */
     public void sendMessage(int currentUserId,int chatId, String msg)throws SQLException {
         query="select isBlocked from userJoinChat where chatId=? and userId = ?";
         preQuery = con.prepareStatement(query);
