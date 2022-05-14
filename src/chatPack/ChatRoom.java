@@ -12,7 +12,7 @@ public class ChatRoom implements Comparable<ChatRoom>{
     private String chatroomImageLink;
     private String dateOfGroupCreation;
     private String timeOfGroupCreation;
-    private Timestamp dateTimeUser;
+    private int numberOfUnreadMessagesForCurrentUser;
     public boolean flag = false;
     public ChatRoom(int id, String name) {
         this.id = id;
@@ -92,6 +92,14 @@ public class ChatRoom implements Comparable<ChatRoom>{
 
     public void setTimeOfGroupCreation(String timeOfGroupCreation) {
         timeOfGroupCreation = timeOfGroupCreation;
+    }
+
+    public int getNumberOfUnreadMessagesForCurrentUser() {
+        return numberOfUnreadMessagesForCurrentUser;
+    }
+
+    public void setNumberOfUnreadMessagesForCurrentUser(int numberOfUnreadMessagesForCurrentUser) {
+        this.numberOfUnreadMessagesForCurrentUser = numberOfUnreadMessagesForCurrentUser;
     }
 
     @Override
