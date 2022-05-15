@@ -1,6 +1,8 @@
 package chatPack;
 
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 
 // Task for : Mohamed Walid
 public class User {
@@ -10,6 +12,8 @@ public class User {
     private int currentChatId;
     private String userImageLink;
     private String lastDateOpened,lastTimeOpened;
+    private ArrayList<Story>userStories;
+    private ArrayList<User>friendsList = new ArrayList<User>();
     public User(){
 
     }
@@ -112,5 +116,25 @@ public class User {
 
     public void setLastTimeOpened(String lastTimeOpened) {
         this.lastTimeOpened = lastTimeOpened;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public ArrayList<User> getFriendsList() {
+        return friendsList;
+    }
+
+    public void setFriendsList(ArrayList<User> friendsList) {
+        this.friendsList = friendsList;
+    }
+
+    public ArrayList<Story> getUserStories() {
+        return userStories;
+    }
+
+    public void setUserStories(ArrayList<Story> userStories) {
+        this.userStories = userStories;
     }
 }
