@@ -107,7 +107,8 @@ public class App {
             return -1;
         // check every attribute if it exists or not in the database by count the number of elements that matches
         //  the user input and return a value for the caller function to decide
-
+        if(!utilities.checkPhoneNum(user.getPhoneNumber()))//mody's work
+            return 3;
         //check  username if it exists by count function as if it was zero then it does not exist otherwise it exists
         query = "select count(username) from user where username = ?";
         preQuery = con.prepareStatement(query);
@@ -561,7 +562,7 @@ public class App {
      * UNDO your own sent messages
      */
     public void deleteMessage(int userId, int currentUserOpenedChatId, int messageId) throws SQLException{
-        query = "delete from message where userId = ? and chatId = ? and id = ?";
+        query = "delete from message where senderId = ? and chatId = ? and id = ?";         ////mody's work sender not user
         preQuery = con.prepareStatement(query);
         preQuery.setInt(1, userId);
         preQuery.setInt(2, currentUserOpenedChatId);
