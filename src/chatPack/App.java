@@ -784,4 +784,24 @@ public class App {
         countUnreadMessage += messageResult.getInt(1);
         return countUnreadMessage;
     }
+    
+    /**
+     * for a specific chatroom check if the message is seen by all the users or not
+     * @param chatId
+     */
+    public void checkSeenStatus(int chatId)throws SQLException{
+        // get the date and time when the user has participated in the chat last time
+        query = "select dateTimeUserOpenedThisChat from userJoinChat order by dateTimeUserOpenedThisChat asc";
+        ResultSet userJoinChatResult = (con.prepareStatement(query)).executeQuery();
+        userJoinChatResult.next();
+        Timestamp dateTimeUserOpenedThisChat = userJoinChatResult.getTimestamp("dateTimeUserOpenedThisChat");
+        query = "select id from message where dateTime <= ? ";
+        ResultSet messageResult = (con.prepareStatement(query)).executeQuery();
+        while (messageResult.next()){
+            query = "update message set seenStatus = true where id = ?";
+            preQuery = con.prepareStatement(query);
+            preQuery.setInt(1,messageResult.getInt("id"));
+            preQuery.executeUpdate();
+        }
+    }
 }
