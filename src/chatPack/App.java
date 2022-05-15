@@ -107,8 +107,7 @@ public class App {
             return -1;
         // check every attribute if it exists or not in the database by count the number of elements that matches
         //  the user input and return a value for the caller function to decide
-        if(!utilities.checkPhoneNum(user.getPhoneNumber()))//mody's work
-            return 3;
+
         //check  username if it exists by count function as if it was zero then it does not exist otherwise it exists
         query = "select count(username) from user where username = ?";
         preQuery = con.prepareStatement(query);
@@ -155,7 +154,7 @@ public class App {
         //mody's work
     }
     public void resetPassword(int userId, String newPassword) throws SQLException{
-        query = "update user set password = ? where userId = ?";
+        query = "update user set password = ? where id = ?";
         preQuery = con.prepareStatement(query);
         preQuery.setString(1, newPassword);
         preQuery.setInt(2, userId);
@@ -354,6 +353,7 @@ public class App {
         preQuery.executeUpdate();
 
     }
+
     //return User object with its userId
     public User getUser(int userId) throws SQLException {
         query = "select username, password, phoneNumber, profileDesc, profileVisibility from user where id = ?";
@@ -363,6 +363,15 @@ public class App {
         tmp.next();
         return new User(userId, tmp.getString(1), tmp.getString(3), tmp.getString(2), tmp.getString(4), tmp.getBoolean(5));
     }
+
+
+
+    /**
+     * get all the friends of a specific user id in an ArrayList
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
     public ArrayList getFriendList(int userId) throws SQLException{
         ArrayList<User>friendList = new ArrayList<User>();
         query = "select userID, friendId, friendName from userConnection where userId = ?";
@@ -399,7 +408,7 @@ public class App {
         System.out.println("\t\t" + chat.getName() + "\n___________________________"+  "\nGroup Members: \n" +
                 "___________________________");
         while (result.next()) {
-            // if the i'th user is blocked then skip.
+            // in the database if the user is removed from group
             if (result.getBoolean(5))
                 continue;
             // the user who opens the application must see the usernames by what he calls them in userConnection table and
@@ -562,7 +571,7 @@ public class App {
      * UNDO your own sent messages
      */
     public void deleteMessage(int userId, int currentUserOpenedChatId, int messageId) throws SQLException{
-        query = "delete from message where senderId = ? and chatId = ? and id = ?";         ////mody's work sender not user
+        query = "delete from message where userId = ? and chatId = ? and id = ?";
         preQuery = con.prepareStatement(query);
         preQuery.setInt(1, userId);
         preQuery.setInt(2, currentUserOpenedChatId);
@@ -824,5 +833,24 @@ public class App {
         ResultSet userConnectionResult = preQuery.executeQuery();
         userConnectionResult.next();
         return userConnectionResult.getString("friendName");
+    }
+
+    /**
+     * for a specific user id get all his published stories in an ArrayList
+     * @param userId
+     * @return
+     * @throws SQLException
+     */
+    public ArrayList<Story> getStoryList(int userId) throws SQLException{
+        ArrayList<Story> storyList = new ArrayList<Story>();
+        checkStoryDate();
+        query = "select * from story where storyUploaderId = ?";
+        preQuery = con.prepareStatement(query);
+        preQuery.setInt(1,userId);
+        ResultSet storyResult = preQuery.executeQuery();
+        while (storyResult.next())
+            storyList.add(new Story(storyResult.getInt("storyUploaderId"), storyResult.getString("storyText"), storyResult.getDate("storyDateUploaded"),
+                    storyResult.getTime("storyTimeUploaded")));
+        return storyList;
     }
 }
